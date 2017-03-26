@@ -12,6 +12,7 @@
 var bl = require('bl');
 var config = require('./config');
 var express = require('express');
+var bodyParser = require('body-parser');
 var fs = require('fs');
 var mentionBot = require('./mention-bot.js');
 var messageGenerator = require('./message.js');
@@ -63,6 +64,7 @@ github.authenticate({
 });
 
 var app = express();
+app.use(bodyParser.urlencoded({ extended: false }))
 
 function buildMentionSentence(reviewers) {
   var atReviewers = reviewers.map(function(owner) { return '@' + owner; });
@@ -427,15 +429,13 @@ async function work(body) {
 };
 
 app.post('/', function(req, res) {
-  req.pipe(bl(function(err, body) {
-    work(body)
-      .then(function() { res.end(); })
-      .catch(function(e) {
-        console.error(e);
-        console.error(e.stack);
-        res.status(500).send('Internal Server Error');
-      });
-  }));
+  work(req.body.payload)
+    .then(function() { res.end(); })
+    .catch(function(e) {
+      console.error(e);
+      console.error(e.stack);
+      res.status(500).send('Internal Server Error');
+    });
 });
 
 app.get('/', function(req, res) {
