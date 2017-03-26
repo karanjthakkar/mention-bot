@@ -218,6 +218,11 @@ async function work(body) {
       return false;
     }
 
+    if (repoConfig.withLabel && !data.label) {
+      console.log('Skipping because pull request uses the option `withLabel` but does not have a label');
+      return false;
+    }
+
     if (repoConfig.skipTitle &&
         data.pull_request.title.indexOf(repoConfig.skipTitle) > -1) {
       console.log('Skipping because pull request title contains: "' + repoConfig.skipTitle + '".');
